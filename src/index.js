@@ -20,6 +20,7 @@ template.innerHTML = /*html*/`
       color: white;
     }
   </style>
+  test
   <button id="dec">-</button>
   <span id="count"></span>
   <button id="inc">+</button>`;
