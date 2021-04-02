@@ -4,10 +4,52 @@
 <head>
 	<meta charset="UTF-8">
 	<script src="./dist/index.js" type="module"></script>
+
+	<style>
+		dt {
+			color: green;
+		}
+
+		dd {
+			color: red;
+		}
+	</style>
 </head>
 
 <body>
-	<my-counter></my-counter>
+
+
+
+
+	<dt slot="question">A big question</dd>
+	<dd slot="answers">
+		<ul>
+			<li>
+				Response 1 <span>11%</span>
+				<bar-chart value="11"></bar-chart>
+			</li>
+			<li>Response 2 <span>22%</span>
+				<bar-chart value="50"></bar-chart>
+			</li>
+			<li>Response 3 <span>33%</span>
+				<bar-chart value="80"></bar-chart>
+			</li>
+		</ul>
+	</dd>
+
+
+
+	<dt slot="question">A big question</dd>
+	<dd slot="answers">
+		<ul>
+			<li>Response 1</li>
+			<li>Response 2</li>
+			<li>Response 3</li>
+		</ul>
+	</dd>
+
+
+
 </body>
 
 </html>
