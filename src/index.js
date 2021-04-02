@@ -4,6 +4,7 @@ class MyCounter extends HTMLElement {
   constructor() {
     super();
 
+    const value = this.getAttribute('value');
     let obvalues = this.getAttribute('values');
     if (obvalues) obvalues = obvalues.split(',');
 
@@ -20,35 +21,47 @@ class MyCounter extends HTMLElement {
     if (obvalues) {
       this.generateMultiBarGraph(obvalues);
     } else {
-      this.generatePlainBarGraph();
+      this.generatePlainBarGraph(value);
     }
 
-
+/*
     this.indicator = this.track.cloneNode(true);
     this.indicator.setAttribute("width", '0');
     this.indicator.style.fill = `var(--track-color, #${colors[0]})`;
 
     
     this.svg.appendChild(this.indicator);
-
+*/
     let shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(this.svg);
   }
 
   generatePlainBarGraph(value) {
-    this.createRect({x:0, y:0, rx:1 , ry:1 , width:0, height:4, color:"efefef"});
-    this.createRect({x:0, y:0, rx:1 , ry:1 , width:100, height:4, color:"red"});
+    this.createRect({x:0, y:0, rx:1 , ry:1 , width:100, height:4, color:"#e3e3e3"});
+    this.createRect({x:0, y:0, rx:1 , ry:1 , width:0, height:4, color:`#${colors[0]}`, animation: "width"});
+    this.createText({x:2, content:value})
   }
 
   generateMultiBarGraph(values) {
     let position = 0;
     values.map( (myvalue, index) => {
-      this.createRect({x: position, y:0, width: myvalue, height:4, color: colors[index]})
+      this.createRect({x: position, y:0, width: myvalue, height:4, color: `#${colors[index]}`})
+      this.createText({x: position,content:myvalue})
       position += Number(myvalue);
     });
   }
 
-  createRect({x, y, rx, ry, width, height, color}) {
+  createText({x, content}) {
+    this.textel = document.createElementNS("http://www.w3.org/2000/svg","text");
+    this.textel.setAttribute("x", x + 2);
+    this.textel.setAttribute("y", "50%");
+    this.textel.style.fontFamily = 'mono';
+    this.textel.style.fontSize = '10%';
+    this.textel.innerHTML = content;
+    this.svg.appendChild(this.textel);
+  }
+
+  createRect({x, y, rx, ry, width, height, color, animation}) {
     console.log("do rect", color);
     this.track = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     this.track.setAttribute("x", x);
@@ -57,21 +70,13 @@ class MyCounter extends HTMLElement {
     this.track.setAttribute("ry", ry);
     this.track.setAttribute("width", width);
     this.track.setAttribute("height", height);
-    this.track.style.fill = `var(--track-color, #${color})`;
+    this.track.style.fill = `var(--track-color, ${color})`;
     this.svg.appendChild(this.track);
-
-    // text
-    this.textel = document.createElementNS("http://www.w3.org/2000/svg","text");
-    this.textel.setAttribute("x", x + 2);
-    this.textel.setAttribute("y", "50%");
-    this.textel.style.fontFamily = 'mono';
-    this.textel.style.fontSize = '10%';
-    this.textel.innerHTML = "content";
-    this.svg.appendChild(this.textel);
+    if (animation) this.animate(this.track);
   }
 
   connectedCallback() {
-     this.animate(this.indicator);
+     // this.animate(this.indicator);
   }
 
   animate (element) {
