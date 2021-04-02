@@ -1,39 +1,80 @@
-
+const colors = ["266dd3","344055","888098","cfb3cd","dfc2f2"];
 
 class MyCounter extends HTMLElement {
   constructor() {
     super();
 
-    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.style.display = 'block';
-    svg.setAttribute("viewBox", "0 0 100 10");
-    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    this.track = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    this.track.setAttribute("x", "0");
-    this.track.setAttribute("y", "0");
-    this.track.setAttribute("width", '100');
-    this.track.setAttribute("height", "10");
-    this.indicator = this.track.cloneNode(true);
-    this.indicator.setAttribute("width", '0');
-    this.track.style.fill = "var(--track-color, #9E9E9E)";
-    this.indicator.style.fill = "var(--track-color, red)";
-
-    svg.appendChild(this.track);
-    svg.appendChild(this.indicator);
-    let shadowRoot = this.attachShadow({mode: 'open'});
-    shadowRoot.appendChild(svg);
+    let obvalues = this.getAttribute('values');
+    if (obvalues) obvalues = obvalues.split(',');
 
     
+    this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    this.svg.style.display = 'block';
+    this.svg.setAttribute("viewBox", "0 0 100 4");
+    this.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    
+    // backgroud
+    
+    
 
+    if (obvalues) {
+      this.generateMultiBarGraph(obvalues);
+    } else {
+      this.generatePlainBarGraph();
+    }
+
+
+    this.indicator = this.track.cloneNode(true);
+    this.indicator.setAttribute("width", '0');
+    this.indicator.style.fill = `var(--track-color, #${colors[0]})`;
+
+    
+    this.svg.appendChild(this.indicator);
+
+    let shadowRoot = this.attachShadow({mode: 'open'});
+    shadowRoot.appendChild(this.svg);
   }
 
-  
+  generatePlainBarGraph(value) {
+    this.createRect({x:0, y:0, rx:1 , ry:1 , width:0, height:4, color:"efefef"});
+    this.createRect({x:0, y:0, rx:1 , ry:1 , width:100, height:4, color:"red"});
+  }
+
+  generateMultiBarGraph(values) {
+    let position = 0;
+    values.map( (myvalue, index) => {
+      this.createRect({x: position, y:0, width: myvalue, height:4, color: colors[index]})
+      position += Number(myvalue);
+    });
+  }
+
+  createRect({x, y, rx, ry, width, height, color}) {
+    console.log("do rect", color);
+    this.track = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    this.track.setAttribute("x", x);
+    this.track.setAttribute("y", y);
+    this.track.setAttribute("rx", rx);
+    this.track.setAttribute("ry", ry);
+    this.track.setAttribute("width", width);
+    this.track.setAttribute("height", height);
+    this.track.style.fill = `var(--track-color, #${color})`;
+    this.svg.appendChild(this.track);
+
+    // text
+    this.textel = document.createElementNS("http://www.w3.org/2000/svg","text");
+    this.textel.setAttribute("x", x + 2);
+    this.textel.setAttribute("y", "50%");
+    this.textel.style.fontFamily = 'mono';
+    this.textel.style.fontSize = '10%';
+    this.textel.innerHTML = "content";
+    this.svg.appendChild(this.textel);
+  }
 
   connectedCallback() {
-    this.animate();
+     this.animate(this.indicator);
   }
 
-  animate () {
+  animate (element) {
 
     // https://gist.github.com/bendc/4d66878dce526da728997d1e4e39325f
 
@@ -144,7 +185,7 @@ class MyCounter extends HTMLElement {
         // 1.Animation logic -----------------------------------------------------------
         const easing = ease.out.elastic(progress);
         const value = getCurrentValue({from: 0, to: this.getAttribute('value'), easing});
-        this.indicator.setAttribute("width", value);
+        element.setAttribute("width", value);
       };
 
       const animation = {
