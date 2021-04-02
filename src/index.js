@@ -35,6 +35,8 @@ class MyCounter extends HTMLElement {
 
   animate () {
 
+    // https://gist.github.com/bendc/4d66878dce526da728997d1e4e39325f
+
     // animation utils
     // ==============
 
