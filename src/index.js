@@ -1,53 +1,37 @@
+import animate from "animateplus";
+
 const colors = ["266dd3","344055","888098","cfb3cd","dfc2f2"];
 
 
 
 const getPosition = (values, index) => {
-  console.log("index",index);
+
   const valuesInNumbers = values.map( value => Number(value));
   const previousValues = valuesInNumbers.slice(0,index);
-  console.log("previousValues",previousValues);
 
   var previousValuesTotal = previousValues.reduce(function (sum, current) { 
     return sum + current;
   }, 0);
-   console.log("previousValuesTotal",previousValuesTotal);
 
-
-  /*
-  console.log(index > 0);
-  let position = 0;
-  let values = 0;
-
-  values += Number(value);
-  position += (index > 0) ? 0 : values;
-  console.log("index", index, "position", position);
-  return position;*/
-
-
-
-  /*
-  console.log("xbef", x);
-  x += Number(value);
-  console.log("xaft", x);
-  
-  const position = (index > 0) ? x : 0;
-  return position;
-  */
   const position = (index > 0) ? previousValuesTotal : 0;
   return position;
   
 };
 
 const template = (values) => {
-  console.log("template values", values);
+
   return `
     <svg style="display:block" viewBox="0 0 100 4" fill="none" xmlns="http://www.w3.org/2000/svg">
       
       <rect width="100" height="4" fill="#e3e3e3"></rect>
       
       ${values.map( (value, index) => `
-      <rect x="${getPosition(values, index)}"  width="${value}" height="4" fill="#${colors[index]}"></rect>
+      <g>
+        <rect ${ values > 0 ? "animate" : ""} x="${getPosition(values, index)}"  width="${value}" height="4" fill="#${colors[index]}"></rect>
+
+        <text fill="white" font-family="arial"
+          font-size="2" x="${getPosition(values, index) + 1 }" y="50%">${value}</text>
+      </g>
       `).join('')}
 
     </svg>`
@@ -62,81 +46,19 @@ class MyCounter extends HTMLElement {
     
     // Multi value
     if (this.getAttribute('values')) this.values = this.getAttribute('values').split(',');
-    
-    
-
-    if (this.values > 1) {
-      // this.generateMultiBarGraph(obvalues);
-    } else {
-      // this.generatePlainBarGraph(value);
-    }
-
-/*
-    this.indicator = this.track.cloneNode(true);
-    this.indicator.setAttribute("width", '0');
-    this.indicator.style.fill = `var(--track-color, #${colors[0]})`;
-
-    
-    this.svg.appendChild(this.indicator);
-*/
+  
     let shadowRoot = this.attachShadow({mode: 'open'});
-    // shadowRoot.appendChild(this.svg);
-  }
-
-  generatePlainBarGraph(value) {
-    this.createRect({x:0, y:0, rx:1 , ry:1 , width:100, height:4, color:"#e3e3e3"});
-    this.createRect({x:0, y:0, rx:1 , ry:1 , width:0, height:4, color:`#${colors[0]}`, animation: "width"});
-    this.createText({x:2, content:value})
-  }
-
-  generateMultiBarGraph(values) {
-    let position = 0;
-    values.map( (myvalue, index) => {
-      this.createRect({x: position, y:0, width: myvalue, height:4, color: `#${colors[index]}`})
-      this.createText({x: position,content:myvalue})
-      position += Number(myvalue);
-    });
-  }
-
-  createText({x, content}) {
-    this.textel = document.createElementNS("http://www.w3.org/2000/svg","text");
-    this.textel.setAttribute("x", x + 2);
-    this.textel.setAttribute("y", "50%");
-    this.textel.style.fontFamily = 'mono';
-    this.textel.style.fontSize = '10%';
-    this.textel.innerHTML = content;
-    this.svg.appendChild(this.textel);
-  }
-
-  createRect({x, y, rx, ry, width, height, color, animation}) {
-    console.log("do rect", color);
-    this.track = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    this.track.setAttribute("x", x);
-    this.track.setAttribute("y", y);
-    this.track.setAttribute("rx", rx);
-    this.track.setAttribute("ry", ry);
-    this.track.setAttribute("width", width);
-    this.track.setAttribute("height", height);
-    this.track.style.fill = `var(--track-color, ${color})`;
-    console.log(template(width, height, color));
-    
-    
-    this.svg.appendChild(this.track);
-    if (animation) this.animate(this.track);
-  }
-
-  getPosition() {
-
+    this.shadowRoot.innerHTML = template(this.values);
   }
   
   connectedCallback() {
-     // this.animate(this.indicator);
-     this.update();
-  }
+    
 
-  update() {
-    console.log(this.values);
-    this.shadowRoot.innerHTML = template(this.values);
+
+    
+    [...this.shadowRoot.querySelectorAll('rect[animate]')].map(
+        rect => this.animate(rect)
+    )     
   }
 
   animate (element) {
