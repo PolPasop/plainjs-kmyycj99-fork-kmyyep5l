@@ -1,27 +1,74 @@
 const colors = ["266dd3","344055","888098","cfb3cd","dfc2f2"];
 
+
+
+const getPosition = (values, index) => {
+  console.log("index",index);
+  const valuesInNumbers = values.map( value => Number(value));
+  const previousValues = valuesInNumbers.slice(0,index);
+  console.log("previousValues",previousValues);
+
+  var previousValuesTotal = previousValues.reduce(function (sum, current) { 
+    return sum + current;
+  }, 0);
+   console.log("previousValuesTotal",previousValuesTotal);
+
+
+  /*
+  console.log(index > 0);
+  let position = 0;
+  let values = 0;
+
+  values += Number(value);
+  position += (index > 0) ? 0 : values;
+  console.log("index", index, "position", position);
+  return position;*/
+
+
+
+  /*
+  console.log("xbef", x);
+  x += Number(value);
+  console.log("xaft", x);
+  
+  const position = (index > 0) ? x : 0;
+  return position;
+  */
+  const position = (index > 0) ? previousValuesTotal : 0;
+  return position;
+  
+};
+
+const template = (values) => {
+  console.log("template values", values);
+  return `
+    <svg style="display:block" viewBox="0 0 100 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+      
+      <rect width="100" height="4" fill="#e3e3e3"></rect>
+      
+      ${values.map( (value, index) => `
+      <rect x="${getPosition(values, index)}"  width="${value}" height="4" fill="#${colors[index]}"></rect>
+      `).join('')}
+
+    </svg>`
+};
+
 class MyCounter extends HTMLElement {
   constructor() {
     super();
 
-    const value = this.getAttribute('value');
-    let obvalues = this.getAttribute('values');
-    if (obvalues) obvalues = obvalues.split(',');
-
+    // One value
+    if (this.getAttribute('value')) this.values = [this.getAttribute('value')];
     
-    this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    this.svg.style.display = 'block';
-    this.svg.setAttribute("viewBox", "0 0 100 4");
-    this.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    
-    // backgroud
+    // Multi value
+    if (this.getAttribute('values')) this.values = this.getAttribute('values').split(',');
     
     
 
-    if (obvalues) {
-      this.generateMultiBarGraph(obvalues);
+    if (this.values > 1) {
+      // this.generateMultiBarGraph(obvalues);
     } else {
-      this.generatePlainBarGraph(value);
+      // this.generatePlainBarGraph(value);
     }
 
 /*
@@ -33,7 +80,7 @@ class MyCounter extends HTMLElement {
     this.svg.appendChild(this.indicator);
 */
     let shadowRoot = this.attachShadow({mode: 'open'});
-    shadowRoot.appendChild(this.svg);
+    // shadowRoot.appendChild(this.svg);
   }
 
   generatePlainBarGraph(value) {
@@ -71,12 +118,25 @@ class MyCounter extends HTMLElement {
     this.track.setAttribute("width", width);
     this.track.setAttribute("height", height);
     this.track.style.fill = `var(--track-color, ${color})`;
+    console.log(template(width, height, color));
+    
+    
     this.svg.appendChild(this.track);
     if (animation) this.animate(this.track);
   }
 
+  getPosition() {
+
+  }
+  
   connectedCallback() {
      // this.animate(this.indicator);
+     this.update();
+  }
+
+  update() {
+    console.log(this.values);
+    this.shadowRoot.innerHTML = template(this.values);
   }
 
   animate (element) {
